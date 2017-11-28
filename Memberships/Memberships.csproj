@@ -197,11 +197,16 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="App_Start\Startup.Auth.cs" />
     <Compile Include="Areas\Admin\AdminAreaRegistration.cs" />
+    <Compile Include="Areas\Admin\Controllers\SectionController.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ManageController.cs" />
     <Compile Include="Entities\ItemType.cs" />
     <Compile Include="Entities\Item.cs" />
+    <Compile Include="Entities\UserSubscription.cs" />
+    <Compile Include="Entities\SubscriptionProduct.cs" />
+    <Compile Include="Entities\ProductItem.cs" />
+    <Compile Include="Entities\Subscription.cs" />
     <Compile Include="Entities\ProductLinkText.cs" />
     <Compile Include="Entities\ProductType.cs" />
     <Compile Include="Entities\Product.cs" />
@@ -241,6 +246,14 @@
     <Content Include="Content\Documents\test_pdf.pdf" />
     <Content Include="Areas\Admin\Views\web.config" />
     <Content Include="Areas\Admin\Views\Shared\_Layout.cshtml" />
+    <Content Include="Areas\Admin\Views\_ViewStart.cshtml" />
+    <Content Include="Areas\Admin\Views\Section\Create.cshtml" />
+    <Content Include="Areas\Admin\Views\Section\Delete.cshtml" />
+    <Content Include="Areas\Admin\Views\Section\Details.cshtml" />
+    <Content Include="Areas\Admin\Views\Section\Edit.cshtml" />
+    <Content Include="Areas\Admin\Views\Section\Index.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\_BackToListButtonPartial.cshtml" />
+    <Content Include="Areas\Admin\Views\Shared\_EditButtonPartial.cshtml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />
@@ -292,7 +305,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
-    <Folder Include="Areas\Admin\Controllers\" />
     <Folder Include="Areas\Admin\Models\" />
   </ItemGroup>
   <ItemGroup>
