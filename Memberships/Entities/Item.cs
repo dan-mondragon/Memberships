@@ -37,7 +37,7 @@ namespace Memberships.Entities
         public int ItemTypeId { get; set; }
         public int SectionId { get; set; }
         public int PartId { get; set; }
-        public int isFree { get; set; }
+        public bool isFree { get; set; }
         [DisplayName("Item Type")]
         public ICollection<ItemType> ItemTypes { get; set; }
         [DisplayName("Section")]
