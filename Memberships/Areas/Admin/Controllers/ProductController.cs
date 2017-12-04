@@ -9,119 +9,123 @@ using System.Web;
 using System.Web.Mvc;
 using Memberships.Entities;
 using Memberships.Models;
+using Memberships.Areas.Admin.Extensions;
+using Memberships.Areas.Admin.Models;
 
 namespace Memberships.Areas.Admin.Controllers
 {
-    public class ItemController : Controller
+    public class ProductController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
-        // GET: Admin/Item
+        // GET: Admin/Product
         public async Task<ActionResult> Index()
         {
-            return View(await db.Items.ToListAsync());
+            var products = await db.Products.ToListAsync();
+            var model = await products.Convert(db);
+            return View(model);
         }
 
-        // GET: Admin/Item/Details/5
+        // GET: Admin/Product/Details/5
         public async Task<ActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Item item = await db.Items.FindAsync(id);
-            if (item == null)
+            Product product = await db.Products.FindAsync(id);
+            if (product == null)
             {
                 return HttpNotFound();
             }
-            return View(item);
+            return View(product);
         }
 
-        // GET: Admin/Item/Create
-        public ActionResult Create()
+        // GET: Admin/Product/Create
+        public async Task<ActionResult> Create()
         {
-            var model = new Item
+            var model = new ProductModel
             {
-                ItemTypes = db.ItemTypes.ToList(),
-                Parts = db.Parts.ToList(),
-                Sections = db.Sections.ToList()
+                ProductLinkTexts = await db.ProductLinkTexts.ToListAsync(),
+                ProductTypes = await db.ProductTypes.ToListAsync()
             };
             return View(model);
         }
 
-        // POST: Admin/Item/Create
+        // POST: Admin/Product/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,Title,Description,Url,ImageUrl,HTML,WaitDays,ProductId,ItemTypeId,SectionId,PartId,isFree")] Item item)
+        public async Task<ActionResult> Create([Bind(Include = "Id,Title,Description,ImageUrl,ProductLinkTextId,ProductTypeId")] Product product)
         {
             if (ModelState.IsValid)
             {
-                db.Items.Add(item);
+                db.Products.Add(product);
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
-            return View(item);
+            return View(product);
         }
 
-        // GET: Admin/Item/Edit/5
+        // GET: Admin/Product/Edit/5
         public async Task<ActionResult> Edit(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Item item = await db.Items.FindAsync(id);
-            item.Parts = await db.Parts.ToListAsync();
-            item.ItemTypes = await db.ItemTypes.ToListAsync();
-            item.Sections = await db.Sections.ToListAsync();
-            if (item == null)
+            Product product = await db.Products.FindAsync(id);
+            if (product == null)
             {
                 return HttpNotFound();
             }
-            return View(item);
+            var prod = new List<Product>();
+            prod.Add(product);
+            var model = await prod.Convert(db);
+
+            return View(model.First());
         }
 
-        // POST: Admin/Item/Edit/5
+        // POST: Admin/Product/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Title,Description,Url,ImageUrl,HTML,WaitDays,ProductId,ItemTypeId,SectionId,PartId,isFree")] Item item)
+        public async Task<ActionResult> Edit([Bind(Include = "Id,Title,Description,ImageUrl,ProductLinkTextId,ProductTypeId")] Product product)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(item).State = EntityState.Modified;
+                db.Entry(product).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-            return View(item);
+            return View(product);
         }
 
-        // GET: Admin/Item/Delete/5
+        // GET: Admin/Product/Delete/5
         public async Task<ActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Item item = await db.Items.FindAsync(id);
-            if (item == null)
+            Product product = await db.Products.FindAsync(id);
+            if (product == null)
             {
                 return HttpNotFound();
             }
-            return View(item);
+            return View(product);
         }
 
-        // POST: Admin/Item/Delete/5
+        // POST: Admin/Product/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            Item item = await db.Items.FindAsync(id);
-            db.Items.Remove(item);
+            Product product = await db.Products.FindAsync(id);
+            db.Products.Remove(product);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
         }
