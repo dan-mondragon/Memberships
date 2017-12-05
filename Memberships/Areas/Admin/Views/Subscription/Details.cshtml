@@ -1,4 +1,4 @@
-﻿@model Memberships.Areas.Admin.Models.ProductModel
+﻿@model Memberships.Entities.Subscription
 
 @{
     ViewBag.Title = "Details";
@@ -7,7 +7,7 @@
 <h2>Details</h2>
 
 <div>
-    <h4>Product</h4>
+    <h4>Subscription</h4>
     <hr />
     <dl class="dl-horizontal">
         <dt>
@@ -27,28 +27,13 @@
         </dd>
 
         <dt>
-            @Html.DisplayNameFor(model => model.ImageUrl)
+            @Html.DisplayNameFor(model => model.RegistrationCode)
         </dt>
 
         <dd>
-            @Html.DisplayFor(model => model.ImageUrl)
+            @Html.DisplayFor(model => model.RegistrationCode)
         </dd>
 
-        <dt>
-            @Html.DisplayNameFor(model => model.ProductType)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.ProductType)
-        </dd>
-
-        <dt>
-            @Html.DisplayNameFor(model => model.ProductLinkText)
-        </dt>
-
-        <dd>
-            @Html.DisplayFor(model => model.ProductLinkText)
-        </dd>
     </dl>
 </div>
 <p>

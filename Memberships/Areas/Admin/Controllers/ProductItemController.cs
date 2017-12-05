@@ -9,127 +9,134 @@ using System.Web;
 using System.Web.Mvc;
 using Memberships.Entities;
 using Memberships.Models;
-using Memberships.Areas.Admin.Extensions;
 using Memberships.Areas.Admin.Models;
+using Memberships.Areas.Admin.Extensions;
 
 namespace Memberships.Areas.Admin.Controllers
 {
-    public class ProductController : Controller
+    public class ProductItemController : Controller
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
-        // GET: Admin/Product
+        // GET: Admin/ProductItem
         public async Task<ActionResult> Index()
         {
-            var products = await db.Products.ToListAsync();
-            var model = await products.Convert(db);
-            return View(model);
+            return View(await db.ProductItems.Convert(db));
         }
 
-        // GET: Admin/Product/Details/5
+        // GET: Admin/ProductItem/Details/5
         public async Task<ActionResult> Details(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Product product = await db.Products.FindAsync(id);
-            if (product == null)
+            ProductItem productItem = await db.ProductItems.FindAsync(id);
+            if (productItem == null)
             {
                 return HttpNotFound();
             }
-            var model = await product.Convert(db);
-            return View(model);
+            return View(productItem);
         }
 
-        // GET: Admin/Product/Create
+        // GET: Admin/ProductItem/Create
         public async Task<ActionResult> Create()
         {
-            var model = new ProductModel
-            {
-                ProductLinkTexts = await db.ProductLinkTexts.ToListAsync(),
-                ProductTypes = await db.ProductTypes.ToListAsync()
-            };
+            var model = new ProductItemModel();
+            model.Items = await db.Items.ToListAsync();
+            model.Products = await db.Products.ToListAsync();
             return View(model);
         }
 
-        // POST: Admin/Product/Create
+        // POST: Admin/ProductItem/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Create([Bind(Include = "Id,Title,Description,ImageUrl,ProductLinkTextId,ProductTypeId")] Product product)
+        public async Task<ActionResult> Create([Bind(Include = "ProductId,ItemId")] ProductItem productItem)
         {
             if (ModelState.IsValid)
             {
-                db.Products.Add(product);
+                db.ProductItems.Add(productItem);
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
 
-            return View(product);
+            return View(productItem);
         }
 
-        // GET: Admin/Product/Edit/5
-        public async Task<ActionResult> Edit(int? id)
+        // GET: Admin/ProductItem/Edit/5
+        public async Task<ActionResult> Edit(int? itemId, int? productId)
         {
-            if (id == null)
+            if (itemId == null || productId == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Product product = await db.Products.FindAsync(id);
-            if (product == null)
+            ProductItem productItem = await GetProductItem(itemId, productId);
+            if (productItem == null)
             {
                 return HttpNotFound();
             }
-            var prod = new List<Product>();
-            prod.Add(product);
-            var model = await prod.Convert(db);
-
-            return View(model.First());
+            var model = await productItem.Convert(db);
+            return View(model);
         }
 
-        // POST: Admin/Product/Edit/5
+        // POST: Admin/ProductItem/Edit/5
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<ActionResult> Edit([Bind(Include = "Id,Title,Description,ImageUrl,ProductLinkTextId,ProductTypeId")] Product product)
+        public async Task<ActionResult> Edit([Bind(Include = "ProductId,ItemId")] ProductItem productItem)
         {
             if (ModelState.IsValid)
             {
-                db.Entry(product).State = EntityState.Modified;
+                db.Entry(productItem).State = EntityState.Modified;
                 await db.SaveChangesAsync();
                 return RedirectToAction("Index");
             }
-            return View(product);
+            return View(productItem);
         }
 
-        // GET: Admin/Product/Delete/5
+        // GET: Admin/ProductItem/Delete/5
         public async Task<ActionResult> Delete(int? id)
         {
             if (id == null)
             {
                 return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
             }
-            Product product = await db.Products.FindAsync(id);
-            if (product == null)
+            ProductItem productItem = await db.ProductItems.FindAsync(id);
+            if (productItem == null)
             {
                 return HttpNotFound();
             }
-            var model = await product.Convert(db);
-            return View(model);
+            return View(productItem);
         }
 
-        // POST: Admin/Product/Delete/5
+        // POST: Admin/ProductItem/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> DeleteConfirmed(int id)
         {
-            Product product = await db.Products.FindAsync(id);
-            db.Products.Remove(product);
+            ProductItem productItem = await db.ProductItems.FindAsync(id);
+            db.ProductItems.Remove(productItem);
             await db.SaveChangesAsync();
             return RedirectToAction("Index");
+        }
+
+        private async Task<ProductItem> GetProductItem(int? itemId, int? productId)
+        {
+            try
+            {
+                int itmId = 0, prdId = 0;
+                int.TryParse(itemId.ToString(), out itmId);
+                int.TryParse(productId.ToString(), out prdId);
+                var productItem = await db.ProductItems.FirstOrDefaultAsync(pi => pi.ItemId.Equals(itmId) && pi.ProductId.Equals(prdId));
+                return productItem;
+            }
+            catch(Exception e)
+            {
+                return null;
+            }
         }
 
         protected override void Dispose(bool disposing)
