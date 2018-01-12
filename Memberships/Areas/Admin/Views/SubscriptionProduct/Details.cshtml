@@ -1,4 +1,4 @@
-﻿@model Memberships.Areas.Admin.Models.ProductItemModel
+﻿@model Memberships.Areas.Admin.Models.SubscriptionProductModel
 @using Memberships.Areas.Admin.Models
 
 @{
@@ -11,13 +11,13 @@
     <h4>ProductItem</h4>
     <hr />
     <dl class="dl-horizontal">
-        <dt>@Html.DisplayNameFor(model => model.ItemTitle)</dt>
-        <dd>@Html.DisplayFor(model => model.ItemTitle)</dd>
+        <dt>@Html.DisplayNameFor(model => model.SubscriptionTitle)</dt>
+        <dd>@Html.DisplayFor(model => model.SubscriptionTitle)</dd>
         <dt>@Html.DisplayNameFor(model => model.ProductTitle)</dt>
         <dd>@Html.DisplayFor(model => model.ProductTitle)</dd>
     </dl>
 </div>
 <p>
-    @Html.Partial("_EditButtonDetailPartial", new EditButtonModel() {ItemId = Model.ItemId, ProductId = Model.ProductId }) |
+    @Html.Partial("_EditButtonDetailPartial", new EditButtonModel() {SubscriptionId = Model.SubscriptionId, ProductId = Model.ProductId }) |
     @Html.Partial("_BackToListButtonPartial")
 </p>
