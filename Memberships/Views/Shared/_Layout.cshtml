@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title - My ASP.NET Application</title>
     @Styles.Render("~/Content/css")
+    @Styles.Render("~/Content/membership")
     @Scripts.Render("~/bundles/modernizr")
-
+    <link href="https://fonts.googleapis.com/css?family=Joti+One" rel="stylesheet">
     <script type = 'text/javascript' >
         var appInsights=window.appInsights||function(config)
         {
@@ -21,15 +22,18 @@
     </script>
 </head>
 <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <div class="navbar navbar-fixed-top">
         <div class="container">
             <div class="navbar-header">
                 <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
+                    <span class="icon-bar navbar-inverse"></span>
+                    <span class="icon-bar navbar-inverse"></span>
+                    <span class="icon-bar navbar-inverse"></span>
                 </button>
-                @Html.ActionLink("Application name", "Index", "Home", new { area = "" }, new { @class = "navbar-brand" })
+                <a class="navbar-brand" href="/Home/index/">
+                    <img src="~/Content/Logos/membership-icon-30x152.png" class="visible-xs" />
+                    <img src="~/Content/Logos/membership-icon-45x184.png" class="hidden-xs" />
+                </a>
             </div>
             <div class="navbar-collapse collapse">
                 <ul class="nav navbar-nav">

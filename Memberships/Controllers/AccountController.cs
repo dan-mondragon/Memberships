@@ -9,6 +9,11 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using Memberships.Models;
+using System.Collections.Generic;
+using Memberships.Areas.Admin.Extensions;
+using System.Net;
+using System.Data.Entity;
+using Memberships.Entities;
 
 namespace Memberships.Controllers
 {
@@ -151,7 +156,7 @@ namespace Memberships.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = new ApplicationUser { UserName = model.Email, Email = model.Email };
+                var user = new ApplicationUser { UserName = model.Email, Email = model.Email, IsActive = true, FirstName = model.FirstName, Registered = DateTime.Now, EmailConfirmed = true };
                 var result = await UserManager.CreateAsync(user, model.Password);
                 if (result.Succeeded)
                 {
@@ -481,5 +486,241 @@ namespace Memberships.Controllers
             }
         }
         #endregion
+
+        public async Task<ActionResult> Index()
+        {
+            var users = new List<UserViewModel>();
+            await users.GetUsers();
+
+            return View(users);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public ActionResult Create()
+        {
+            return View();
+        }
+
+        //
+        // POST: /Account/Create
+        [HttpPost]
+        [Authorize(Roles = "Admin")]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Create(UserViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var user = new ApplicationUser {
+                    UserName = model.Email, Email = model.Email, IsActive = true, FirstName = model.FirstName, Registered = DateTime.Now, EmailConfirmed = true
+                };
+                var result = await UserManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index", "Account");
+                }
+                AddErrors(result);
+            }
+
+            // If we got this far, something failed, redisplay form
+            return View(model);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> Edit(string userId)
+        {
+            if (userId == null || userId.Equals(string.Empty))
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            ApplicationUser user = await UserManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+
+            var model = new UserViewModel()
+            {
+                Email = user.Email,
+                FirstName = user.FirstName,
+                Id = user.Id,
+                Password = user.PasswordHash
+            };
+            return View(model);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Edit(UserViewModel model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var user = await UserManager.FindByIdAsync(model.Id);
+                    if (user != null)
+                    {
+                        user.Email = model.Email;
+                        user.FirstName = model.FirstName;
+                        user.UserName = model.Email;
+                        if (!user.PasswordHash.Equals(model.Password))
+                        {
+                            user.PasswordHash = UserManager.PasswordHasher.HashPassword(model.Password);
+                        }
+                        var result = await UserManager.UpdateAsync(user);
+                        if (result.Succeeded)
+                        {
+                            return RedirectToAction("Index", "Account");
+                        }
+                        AddErrors(result);
+                    }
+                    return RedirectToAction("Index");
+                }
+            }
+            catch(Exception e){}
+            
+            return View(model);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> Delete(string userId)
+        {
+            if (userId == null || userId.Equals(string.Empty))
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+            ApplicationUser user = await UserManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                return HttpNotFound();
+            }
+
+            var model = new UserViewModel()
+            {
+                Email = user.Email,
+                FirstName = user.FirstName,
+                Id = user.Id,
+                Password = "Fake Password"
+            };
+            return View(model);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<ActionResult> Delete(UserViewModel model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var user = await UserManager.FindByIdAsync(model.Id);
+                    var result = await UserManager.DeleteAsync(user);
+                    if (result.Succeeded)
+                    {
+                        var db = new ApplicationDbContext();
+                        var subscriptions = db.UserSubscriptions.Where(u => u.UserId.Equals(model.Id));
+                        db.UserSubscriptions.RemoveRange(subscriptions);
+                        await db.SaveChangesAsync();
+                        return RedirectToAction("Index", "Account");
+                    }
+                    AddErrors(result);
+                }
+            }
+            catch (Exception e) { }
+
+            return View(model);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> Subscriptions(string userId)
+        {
+            if (userId == null || userId.Equals(string.Empty))
+            {
+                return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+            }
+
+            var model = new UserSubscriptionViewModel();
+            var db = new ApplicationDbContext();
+            model.UserSubscriptions = await (from us in db.UserSubscriptions
+                                             join s in db.Subscriptions on us.SubscriptionId equals s.Id
+                                             where us.UserId.Equals(userId)
+                                             select new UserSubscriptionModel()
+                                             {
+                                                 Id = us.SubscriptionId,
+                                                 StartDate = us.StartDate,
+                                                 EndDate = us.EndDate,
+                                                 Description = s.Description,
+                                                 RegistrationCode = s.RegistrationCode,
+                                                 Title = s.Title
+                                             }).ToListAsync();
+            var ids = model.UserSubscriptions.Select(us => us.Id);
+            model.Subscriptions = await db.Subscriptions.Where(s => !ids.Contains(s.Id)).ToListAsync();
+            model.DisableDropDown = model.Subscriptions.Count().Equals(0);
+            model.UserId = userId;
+            return View(model);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<ActionResult> Subscriptions(UserSubscriptionViewModel model)
+        {
+            try
+            {
+                if (model == null)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var db = new ApplicationDbContext();
+                    db.UserSubscriptions.Add(new UserSubscription()
+                    {
+                        UserId = model.UserId,
+                        SubscriptionId = model.SubscriptionId,
+                        StartDate = DateTime.Now,
+                        EndDate = DateTime.MaxValue
+                    });
+                    await db.SaveChangesAsync();
+                }
+            }
+            catch (Exception e) { }
+
+            return RedirectToAction("Subscriptions", "Account", new { userId = model.UserId });
+        }
+
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult> RemoveUserSubscription(int subscriptionId, string userId)
+        {
+            try
+            {
+                if (userId == null || userId.Equals(string.Empty) || subscriptionId <= 0)
+                {
+                    return new HttpStatusCodeResult(HttpStatusCode.BadRequest);
+                }
+
+                if (ModelState.IsValid)
+                {
+                    var db = new ApplicationDbContext();
+                    var subscription = db.UserSubscriptions.Where(us => us.SubscriptionId == subscriptionId && us.UserId.Equals(userId));
+                    db.UserSubscriptions.RemoveRange(subscription);
+                    await db.SaveChangesAsync();
+                }
+            }
+            catch (Exception e) { }
+
+            return RedirectToAction("Subscriptions", "Account", new { userId = userId });
+        }
     }
 }
