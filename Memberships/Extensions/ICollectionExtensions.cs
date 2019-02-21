@@ -8,8 +8,7 @@ namespace Memberships.Extensions
 {
     public static class ICollectionExtensions
     {
-        public static IEnumerable<SelectListItem> ToSelectListItem<T>(
-            this ICollection<T> items, int selectedValue)
+        public static IEnumerable<SelectListItem> ToSelectListItem<T>(this ICollection<T> items, int selectedValue)
         {
             return from item in items
                    select new SelectListItem

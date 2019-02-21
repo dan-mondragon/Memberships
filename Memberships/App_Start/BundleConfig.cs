@@ -34,11 +34,17 @@ namespace Memberships
                       "~/Content/navbar.css",
                       "~/Content/thumbnails.css",
                       "~/Content/ProductContent.css",
-                      "~/Content/carret.css"));
+                      "~/Content/carret.css",
+                      "~/Content/RegisterCode.css",
+                      "~/Content/RegisterUser.css",
+                      "~/Content/Login.css"));
 
             bundles.Add(new ScriptBundle("~/bundles/ui").Include(
                 "~/Scripts/carret.js",
-                "~/Scripts/videojs.js"));
+                "~/Scripts/videojs.js",
+                "~/Scripts/RegisterCode.js",
+                "~/Scripts/RegisterUser.js",
+                "~/Scripts/Login.js"));
         }
     }
 }

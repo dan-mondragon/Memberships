@@ -1,4 +1,6 @@
 ﻿@model IEnumerable<Memberships.Models.ThumbnailAreaModel>
+@using Memberships.Models
+
 @{
     ViewBag.Title = "Home Page";
 }
@@ -17,6 +19,14 @@
             <h2>I am not logged in.</h2>
         </div>
         <div class="col-lg-3 col-md-4 col-sm-5">
+            @Html.Partial("_RegisterUserPartial", new RegisterUserModel { Email="", Name="", Password=""})
         </div>
     }
+</div>
+
+<div class="row">
+    <div class="col-sm-3 register-code-area">
+        @Html.Partial("_RegisterCodePartial")
+    </div>
+    <div class="col-sm-9"></div>
 </div>
